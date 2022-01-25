@@ -13,27 +13,99 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>
 
-from os.path           import join
+from os.path import     join
+from listCancers import get_raw_data
 
-def data(path=r'..\Data_Files',file='all_data_raw.txt'):
-    '''
-    This generator iterates through the raw data file, skipping over the header,
-    and stripping line terminators
-    '''
-    processedHeader = False
-    with open(join(path,file)) as f:
-        for line in f:
-            if processedHeader:
-                yield(line.strip())
-            else:
-                processedHeader = True
+class Cholangiocarcinoma:
+    dictionary = {}
+    CHOL       = 0
+    EHCH       = CHOL + 1
+    IHCH       = EHCH + 1
+
+    @classmethod
+    def add(cls,cholangiocarcinoma):
+        Cholangiocarcinoma.dictionary[cholangiocarcinoma.name] = cholangiocarcinoma
+
+    @classmethod
+    def get(cls,key):
+        if key in Cholangiocarcinoma.dictionary:
+            return Cholangiocarcinoma.dictionary[key]
+        else:
+            return None
+
+    @classmethod
+    def build(cls):
+        Cholangiocarcinoma('CHOL')
+        Cholangiocarcinoma('Cholangiocarcinoma')
+        Cholangiocarcinoma('Cholangio Extrahepatic',
+                           specificity = 1,
+                           group       = Cholangiocarcinoma.EHCH)
+        Cholangiocarcinoma('Cholangio Intrahepatic',
+                           specificity = 1,
+                           group       = Cholangiocarcinoma.IHCH)
+        Cholangiocarcinoma('EHCH',
+                           specificity = 1,
+                           group       = Cholangiocarcinoma.EHCH)
+        Cholangiocarcinoma('Extrahepatic Cholangiocarcinoma',
+                           specificity = 1,
+                           group       = Cholangiocarcinoma.EHCH)
+        Cholangiocarcinoma('Intrahepatic Cholangiocarcinoma',
+                           specificity = 1,
+                           group       = Cholangiocarcinoma.IHCH)
+        Cholangiocarcinoma('Hepatocellular Carcinoma plus Intrahepatic Cholangiocarcinoma',
+                           specificity = 2,
+                           group       = Cholangiocarcinoma.IHCH)
+        Cholangiocarcinoma('Perihilar Cholangiocarcinoma',
+                           specificity = 2,
+                           group       = Cholangiocarcinoma.EHCH)
+        Cholangiocarcinoma('IHCH',
+                           specificity = 1,
+                           group       = Cholangiocarcinoma.IHCH)
+
+    def __init__(self,name,specificity=0,group=CHOL):
+        self.name        = name
+        self.specificity = specificity
+        self.group       = group
+        Cholangiocarcinoma.add(self)
+
+    def __str__(self):
+        return self.name
+
+class RecordAccumulator:
+    def __init__(self):
+        self.cancer_type = None
+
+    def accumulate(self,fields):
+        cholangiocarcinoma = Cholangiocarcinoma.get(fields[3])
+        if cholangiocarcinoma == None: return
+        if self.cancer_type == None:
+            self.cancer_type = cholangiocarcinoma
+        else:
+            if cholangiocarcinoma.specificity>self.cancer_type.specificity:
+                self.cancer_type = cholangiocarcinoma
+            elif cholangiocarcinoma.specificity==self.cancer_type.specificity:
+                if self.cancer_type.group != cholangiocarcinoma.group:
+                    print (fields[0],self.cancer_type,cholangiocarcinoma)
+    def consolidate(self):
+        # if self.cancer_type != None:
+            # print (self.cancer_type)
+        self.cancer_type = None
 
 if __name__=='__main__':
-    cancers = set()
+    Cholangiocarcinoma.build()
+    accumulator = RecordAccumulator()
+    record_id = None
+    for isHeader,fields in get_raw_data():
+        if isHeader:
+            pass
+        else:
+            if record_id==fields[0]:
+                accumulator.accumulate(fields)
+            else:
+                accumulator.consolidate()
+                record_id   = fields[0]
+                accumulator.accumulate(fields)
 
-    with open('cancers.txt','w') as out:
-        for line in data():
-            fields = line.split('\t')
-            cancers.add(fields[3].replace('"',''))
-        for cancer in sorted(cancers):
-            out.write (f'{cancer}\n')
+    accumulator.consolidate()
+
+

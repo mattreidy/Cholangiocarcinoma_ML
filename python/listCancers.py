@@ -13,15 +13,28 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>
 
-from os.path           import join
+'''
+Extract master list of cancers from raw data.
+'''
+from os.path import join
 
+def get_raw_data(path = r'..\Data_Files',
+                file = 'all_data_raw.txt'):
+    '''
+    This generator iterates through the raw data file, skipping over the header,
+    and stripping line terminators
+    '''
+    isHeader = True
+    with open(join(path,file)) as f:
+        for line in f:
+            yield(isHeader,line.strip().split('\t'))
+            isHeader = False
 
 if __name__=='__main__':
     cancers = set()
-    with open(join(r'..\Data_Files','all_data_raw.txt')) as f, \
-         open('cancers.txt','w') as out:
-        for line in f:
-            fields = line.strip().split('\t')
-            cancers.add(fields[3].replace('"',''))
+    for isHeader,fields in get_raw_data():
+        if isHeader: continue
+        cancers.add(fields[3].replace('"',''))
+    with open('cancers.txt','w') as out:
         for cancer in sorted(cancers):
             out.write (f'{cancer}\n')
