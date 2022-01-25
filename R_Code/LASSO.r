@@ -17,3 +17,6 @@ coef(cv.lasso, cv.lasso$lambda.min)
 Coef <- coef(cv.lasso, cv.lasso$lambda.min)
 write.csv(x = as.matrix(Coef), file = "G:/my drive/machine learning/Cholangiocarcinoma_ML/Data_Files/LASSO_Coef.csv", row.names = TRUE)
 Coef
+CoefData <- read.csv("G:/my drive/machine learning/Cholangiocarcinoma_ML/Data_Files/LASSO_Coef.csv", header=TRUE)
+colnames(CoefData) <- c("Gene","Coef")
+CoefData = CoefData[-1,]
