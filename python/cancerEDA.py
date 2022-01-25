@@ -25,6 +25,9 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>
 
+'''
+Compare mutations in Cholangiocarcinoma with other cancers
+'''
 from os.path           import join
 from matplotlib.pyplot import figure, savefig, show, title
 from pandas            import read_csv
