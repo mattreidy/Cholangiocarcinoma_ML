@@ -66,24 +66,30 @@ def plot_samples_and_mutations(df,
     ax.set_ylabel('Samples')
 
 
+def save_codes(codes):
+    with open('mutation-codes-by-counts.txt','w') as out:
+        for code in codes:
+            out.write(f'{code}\n')
+
 if __name__=='__main__':
     other_cancer,cholangiocarcinoma              = read_and_split()
     mutation_counts_other_cancer                 = other_cancer.sum(axis=0)
     mutation_counts_other_cancer_descending      = mutation_counts_other_cancer.sort_values(ascending=False)
     mutation_counts_cholangiocarcinoma           = cholangiocarcinoma.sum(axis=0)
     mutation_codes_sorted_by_counts_other_cancer = mutation_counts_other_cancer_descending.keys().tolist()
+    save_codes(mutation_codes_sorted_by_counts_other_cancer)
 
-    fig                                          = figure(figsize=(20,20))
-    axs                                          = fig.subplots(2)
+    fig = figure(figsize=(20,20))
+    axs = fig.subplots(2)
     plot_samples_and_mutations(other_cancer[mutation_codes_sorted_by_counts_other_cancer],
                                ax    = axs[0],
                                title = f'Other Cancer {other_cancer.shape[0]} samples')
     plot_samples_and_mutations(cholangiocarcinoma[mutation_codes_sorted_by_counts_other_cancer],
                                ax    = axs[1],
-                               title = f'Cholangiocarcinoma {cholangiocarcinoma.shape[0]} samples'         )
+                               title = f'Cholangiocarcinoma {cholangiocarcinoma.shape[0]} samples')
 
-    fig.subplots_adjust(left   = 0.05,
-                        right  = 0.95,
+    fig.subplots_adjust(left   = 0.02,
+                        right  = 0.98,
                         top    = 0.95,
                         bottom = 0.05)
     savefig('cancerEDA.png')
