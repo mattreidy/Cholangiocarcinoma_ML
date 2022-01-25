@@ -19,10 +19,22 @@ or cancer_type ='CHOL'
 or cancer_type ='Cholangio Extrahepatic'
 or cancer_type ='Cholangio Intrahepatic'
 or cancer_type ='Cholangiocarcinoma'
-or cancer_type ='EHCH'
 or cancer_type ='Extrahepatic Cholangiocarcinoma'
 or cancer_type ='Hepatocellular Carcinoma plus Intrahepatic Cholangiocarcinoma'
 or cancer_type ='IHCH'
 or cancer_type ='Intrahepatic Cholangiocarcinoma'
 or cancer_type ='Perihilar Cholangiocarcinoma'
 order by cancer_type
+
+select count(*)  as Extrahepatic from [summary_data].[dbo].[all_data_raw_dedupe] where 
+cancer_type = 'Cholangio Extrahepatic'
+or cancer_type ='Extrahepatic Cholangiocarcinoma'
+or cancer_type ='Perihilar Cholangiocarcinoma'
+
+select count(*) as Intrahepatic from [summary_data].[dbo].[all_data_raw_dedupe] where 
+cancer_type ='Cholangio Intrahepatic'
+or cancer_type ='Hepatocellular Carcinoma plus Intrahepatic Cholangiocarcinoma'
+or cancer_type ='IHCH'
+or cancer_type ='Intrahepatic Cholangiocarcinoma'
+
+
